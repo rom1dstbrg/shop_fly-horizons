@@ -6,13 +6,13 @@ import { DeleteOrderButton } from "@/components/admin/DeleteOrderButton";
 export const metadata = { title: "Commandes — Admin" };
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
-  pending:    { label: "En attente",  color: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20" },
-  paid:       { label: "Payee",       color: "text-blue-400 bg-blue-400/10 border-blue-400/20" },
-  processing: { label: "En cours",    color: "text-blue-400 bg-blue-400/10 border-blue-400/20" },
-  shipped:    { label: "Expediee",    color: "text-purple-400 bg-purple-400/10 border-purple-400/20" },
-  delivered:  { label: "Livree",      color: "text-green-500 bg-green-500/10 border-green-500/20" },
-  cancelled:  { label: "Annulee",     color: "text-destructive bg-destructive/10 border-destructive/20" },
-  refunded:   { label: "Remboursee",  color: "text-muted-foreground bg-muted/10 border-border" },
+  pending:    { label: "En attente",  color: "text-yellow-700 bg-yellow-50 border-yellow-200" },
+  paid:       { label: "Payee",       color: "text-blue-700 bg-blue-50 border-blue-200" },
+  processing: { label: "En cours",    color: "text-blue-700 bg-blue-50 border-blue-200" },
+  shipped:    { label: "Expediee",    color: "text-purple-700 bg-purple-50 border-purple-200" },
+  delivered:  { label: "Livree",      color: "text-green-700 bg-green-50 border-green-200" },
+  cancelled:  { label: "Annulee",     color: "text-red-700 bg-red-50 border-red-200" },
+  refunded:   { label: "Remboursee",  color: "text-muted-foreground bg-muted border-border" },
 };
 
 export default async function AdminOrdersPage() {
@@ -92,18 +92,37 @@ export default async function AdminOrdersPage() {
                   )}
                 </div>
 
-                {address?.city ? (
-                  <div className="text-xs text-muted-foreground bg-secondary/50 rounded-md px-3 py-2">
-                    <span className="font-medium text-foreground/70">Adresse : </span>
-                    {address.full_name && `${address.full_name}, `}
-                    {address.line1}{address.line2 ? `, ${address.line2}` : ""},{" "}
-                    {address.postal_code} {address.city}, {address.country}
-                  </div>
-                ) : (
-                  <div className="text-xs text-muted-foreground bg-secondary/50 rounded-md px-3 py-2">
-                    Adresse non renseignee
-                  </div>
-                )}
+                <div className="mt-4 pt-4 border-t border-border">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
+                    Expedition
+                  </p>
+                  {address?.line1 || address?.city ? (
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-0.5">
+                        {address.full_name && (
+                          <p className="text-sm font-semibold text-foreground">{address.full_name}</p>
+                        )}
+                        {address.email && (
+                          <p className="text-sm text-primary font-medium">{address.email}</p>
+                        )}
+                        {address.line1 && (
+                          <p className="text-sm text-foreground">{address.line1}</p>
+                        )}
+                        {address.line2 && (
+                          <p className="text-sm text-foreground">{address.line2}</p>
+                        )}
+                        <p className="text-sm text-foreground">
+                          {[address.postal_code, address.city].filter(Boolean).join(" ")}
+                        </p>
+                        {address.country && (
+                          <p className="text-sm text-muted-foreground">{address.country}</p>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-destructive font-medium">Adresse non renseignee</p>
+                  )}
+                </div>
               </div>
             );
           })}

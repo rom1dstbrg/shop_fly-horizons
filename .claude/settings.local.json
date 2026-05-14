@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:fly-horizons.com)",
+      "Bash(curl -s https://fly-horizons.com)",
+      "Bash(curl *)",
+      "Bash(supabase *)"
+    ]
+  }
+}

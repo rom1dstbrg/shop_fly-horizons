@@ -88,6 +88,14 @@ export default function CheckoutPage() {
           })),
           shippingCountry: country,
           couponCode: couponCode || null,
+          shippingAddress: selectedAddress ? {
+            full_name: selectedAddress.full_name,
+            line1: selectedAddress.line1,
+            line2: selectedAddress.line2 ?? "",
+            city: selectedAddress.city,
+            postal_code: selectedAddress.postal_code,
+            country: selectedAddress.country,
+          } : null,
         }),
       });
 

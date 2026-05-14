@@ -19,6 +19,7 @@ interface ShippingAddress {
 interface SendOrderConfirmationParams {
   to: string;
   orderRef: string;
+  customerName?: string;
   items: OrderItem[];
   subtotal: number;
   shippingCost: number;
@@ -35,6 +36,7 @@ export async function sendOrderConfirmation(params: SendOrderConfirmationParams)
     const html = orderConfirmationEmail({
       orderRef,
       customerEmail: to,
+      customerName: rest.customerName,
       ...rest,
     });
 

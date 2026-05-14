@@ -93,6 +93,7 @@ export interface Coupon {
 
 export interface ShippingAddress {
   full_name?: string;
+  email?: string;
   line1?: string;
   line2?: string;
   city?: string;

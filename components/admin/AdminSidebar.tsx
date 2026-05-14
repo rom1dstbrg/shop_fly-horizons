@@ -85,12 +85,12 @@ export function AdminSidebar() {
   return (
     <>
       {/* Sidebar desktop */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-navy-900 border-r border-border z-40">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-64 bg-card border-r border-border z-40">
         <NavContent />
       </aside>
 
       {/* Header mobile */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-navy-900 border-b border-border flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 h-16 bg-card border-b border-border flex items-center justify-between px-4">
         <Link href="/">
           <span className="text-base font-bold text-gold-gradient tracking-wide">
             FLY HORIZONS
@@ -108,10 +108,10 @@ export function AdminSidebar() {
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-40">
           <div
-            className="absolute inset-0 bg-navy-950/80"
+            className="absolute inset-0 bg-foreground/20"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-navy-900 border-r border-border flex flex-col pt-16">
+          <aside className="absolute left-0 top-0 bottom-0 w-64 bg-card border-r border-border flex flex-col pt-16">
             <NavContent />
           </aside>
         </div>

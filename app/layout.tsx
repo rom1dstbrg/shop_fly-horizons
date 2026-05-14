@@ -14,11 +14,14 @@ export const metadata: Metadata = {
     default: "Fly Horizons Shop",
     template: "%s | Fly Horizons Shop",
   },
-  description:
-    "Boutique officielle Fly Horizons — Accessoires aviation premium.",
+  description: "Boutique officielle Fly Horizons — Accessoires aviation premium.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
   ),
+  icons: {
+    icon: "/icone.svg",
+    shortcut: "/icone.svg",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${poppins.variable} h-full`}>
-      <body className="min-h-full flex flex-col antialiased">
+      <body className="min-h-full antialiased">
         {children}
       </body>
     </html>

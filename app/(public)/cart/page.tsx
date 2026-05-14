@@ -68,7 +68,7 @@ export default function CartPage() {
               <div key={item.id} className="card-premium p-4 flex gap-4">
 
                 {/* Image */}
-                <div className="relative w-20 h-20 rounded-md overflow-hidden bg-navy-800 shrink-0 border border-border">
+                <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted shrink-0 border border-border">
                   {item.image_url ? (
                     <Image
                       src={item.image_url}

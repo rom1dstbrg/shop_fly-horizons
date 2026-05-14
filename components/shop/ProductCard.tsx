@@ -12,11 +12,11 @@ export function ProductCard({ product }: ProductCardProps) {
   const isOutOfStock = product.stock === 0;
 
   return (
-    <Link href={`/product/${product.slug}`} className="group block">
-      <div className="card-premium overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-premium-lg hover:-translate-y-1">
+    <Link href={`/product/${product.slug}`} className="group flex h-full">
+      <div className="card-premium overflow-hidden transition-all duration-300 hover:border-primary/40 hover:shadow-premium-lg hover:-translate-y-1 flex flex-col w-full">
 
-        {/* Image */}
-        <div className="relative aspect-square bg-navy-800 overflow-hidden">
+        {/* Image — hauteur fixe via aspect-ratio */}
+        <div className="relative aspect-square bg-muted overflow-hidden shrink-0">
           {mainImage ? (
             <Image
               src={mainImage}
@@ -33,8 +33,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Badge stock */}
           {isOutOfStock && (
-            <div className="absolute inset-0 bg-navy-950/70 flex items-center justify-center">
-              <span className="bg-navy-800 text-muted-foreground text-xs font-medium px-3 py-1 rounded-full border border-border">
+            <div className="absolute inset-0 bg-foreground/60 flex items-center justify-center">
+              <span className="bg-card text-muted-foreground text-xs font-medium px-3 py-1 rounded-full border border-border">
                 Rupture de stock
               </span>
             </div>
@@ -50,19 +50,21 @@ export function ProductCard({ product }: ProductCardProps) {
           )}
         </div>
 
-        {/* Infos */}
-        <div className="p-4 space-y-2">
-          <h3 className="font-semibold text-foreground text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
+        {/* Infos — flex column qui occupe le reste */}
+        <div className="p-4 flex flex-col flex-1">
+
+          {/* Titre — max 2 lignes */}
+          <h3 className="font-semibold text-foreground text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2 mb-2">
             {product.title}
           </h3>
 
-          {product.short_description && (
-            <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2">
-              {product.short_description}
-            </p>
-          )}
+          {/* Description — toujours présente, max 2 lignes, hauteur fixe */}
+          <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2 min-h-[2.5rem]">
+            {product.short_description ?? ""}
+          </p>
 
-          <div className="flex items-center justify-between pt-1">
+          {/* Prix + tag — collé en bas */}
+          <div className="flex items-center justify-between mt-auto pt-3">
             <span className="text-primary font-bold text-base">
               {formatPrice(product.price)}
             </span>

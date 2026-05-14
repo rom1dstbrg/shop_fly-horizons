@@ -1,18 +1,26 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-navy-950 border-t border-border mt-auto">
+    <footer className="bg-navy-dk border-t border-border mt-auto">
       <div className="container-shop py-12">
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-border">
 
           <div className="space-y-3">
-            <span className="text-lg font-bold text-gold-gradient tracking-wide">
-              FLY HORIZONS
-            </span>
+            <Link href="/">
+              <Image
+                src="/header-shop-white.png"
+                alt="Fly Horizons Shop"
+                width={160}
+                height={36}
+                className="block h-8 w-auto object-contain"
+                unoptimized
+              />
+            </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
               Accessoires aviation premium pour les passionnes du ciel.
             </p>
@@ -49,6 +57,11 @@ export function Footer() {
               <li>
                 <Link href="/account" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Mon compte
+                </Link>
+              </li>
+              <li>
+                <Link href="/cgv" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Conditions générales de vente
                 </Link>
               </li>
               <li>

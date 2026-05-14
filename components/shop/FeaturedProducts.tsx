@@ -8,7 +8,7 @@ interface FeaturedProductsProps {
 
 export function FeaturedProducts({ products }: FeaturedProductsProps) {
   return (
-    <section className="py-20 bg-navy-950">
+    <section className="py-20 bg-background">
       <div className="container-shop">
 
         {/* Header section */}

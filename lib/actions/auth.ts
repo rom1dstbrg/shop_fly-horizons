@@ -49,11 +49,14 @@ export async function register(formData: FormData) {
     return { error: "Le mot de passe doit contenir au moins 8 caractères." };
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://shop.fly-horizons.com";
+
   const { error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { full_name },
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 

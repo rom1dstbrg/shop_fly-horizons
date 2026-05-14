@@ -29,14 +29,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: product } = await supabase
-    .from("products")
-    .select("*, images:product_images(*)")
-    .eq("slug", slug)
-    .eq("active", true)
-    .single();
+  const [{ data: product }, { data: relatedProducts }] = await Promise.all([
+    supabase
+      .from("products")
+      .select("*, images:product_images(*)")
+      .eq("slug", slug)
+      .eq("active", true)
+      .single(),
+    supabase
+      .from("products")
+      .select("*, images:product_images(*)")
+      .eq("active", true)
+      .neq("slug", slug)
+      .limit(4),
+  ]);
 
   if (!product) notFound();
 
-  return <ProductDetail product={product} />;
+  return <ProductDetail product={product} relatedProducts={relatedProducts ?? []} />;
 }

@@ -9,7 +9,7 @@
    ============================================== */
 @theme inline {
 
-  /* Tokens semantiques (lies aux variables CSS) */
+  /* Tokens semantiques */
   --color-background:             var(--background);
   --color-foreground:             var(--foreground);
   --color-card:                   var(--card);
@@ -29,7 +29,7 @@
   --color-input:                  var(--input);
   --color-ring:                   var(--ring);
 
-  /* Sidebar (requis par shadcn) */
+  /* Sidebar */
   --color-sidebar:                    var(--sidebar);
   --color-sidebar-foreground:         var(--sidebar-foreground);
   --color-sidebar-primary:            var(--sidebar-primary);
@@ -39,12 +39,17 @@
   --color-sidebar-border:             var(--sidebar-border);
   --color-sidebar-ring:               var(--sidebar-ring);
 
-  /* Charts (requis par shadcn) */
+  /* Charts */
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  /* Couleurs nommees — generent bg-navy, bg-navy-dk, bg-gold, etc. */
+  --color-navy:    #113356;
+  --color-navy-dk: #0b2238;
+  --color-gold:    #F2B705;
 
   /* Palette Navy */
   --color-navy-50:  oklch(0.97 0.01 260);
@@ -86,10 +91,12 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 
-  /* Ombres premium */
-  --shadow-premium:    0 4px 24px oklch(0.10 0.04 255 / 0.4);
-  --shadow-premium-lg: 0 8px 48px oklch(0.10 0.04 255 / 0.5);
-  --shadow-gold:       0 4px 24px oklch(0.72 0.16 85 / 0.3);
+  /* Ombres — valeurs exactes fly-horizons.com */
+  --shadow-premium:    0 2px 14px rgba(17,51,86,.07);
+  --shadow-premium-lg: 0 8px 32px rgba(17,51,86,.11);
+  --shadow-premium-xl: 0 20px 60px rgba(17,51,86,.16);
+  --shadow-gold:       0 6px 24px rgba(242,183,5,.35);
+  --shadow-gold-sm:    0 4px 12px rgba(242,183,5,.30);
 
   /* Animations */
   --animate-fade-in:  fadeIn 0.4s ease-out;
@@ -97,55 +104,68 @@
 }
 
 /* ==============================================
-   TOKENS SEMANTIQUES — Fly Horizons (fond sombre fixe)
-   On n'utilise PAS de mode clair.
+   TOKENS SEMANTIQUES — Fly Horizons
    ============================================== */
 :root {
-  --background:          oklch(0.10 0.04 255);
-  --foreground:          oklch(0.95 0.01 260);
+  /* Source variables — fly-horizons.com */
+  --navy:      #113356;
+  --navy-dk:   #0b2238;
+  --gold:      #F2B705;
+  --gold-soft: rgba(242,183,5,.12);
+  --r-sm:      10px;
+  --r-md:      18px;
+  --r-lg:      26px;
+  --sh-sm:     0 2px 14px rgba(17,51,86,.07);
+  --sh-md:     0 8px 32px rgba(17,51,86,.11);
+  --sh-lg:     0 20px 60px rgba(17,51,86,.16);
+  --ease:      cubic-bezier(.4,0,.2,1);
 
-  --card:                oklch(0.16 0.06 255);
-  --card-foreground:     oklch(0.95 0.01 260);
+  /* Shadcn semantic tokens */
+  --background:           #f6f8fc;
+  --foreground:           #1e2535;
 
-  --popover:             oklch(0.16 0.06 255);
-  --popover-foreground:  oklch(0.95 0.01 260);
+  --card:                 #ffffff;
+  --card-foreground:      #1e2535;
 
-  --primary:             oklch(0.72 0.16 85);
-  --primary-foreground:  oklch(0.10 0.04 255);
+  --popover:              #ffffff;
+  --popover-foreground:   #1e2535;
 
-  --secondary:           oklch(0.22 0.09 255);
-  --secondary-foreground: oklch(0.95 0.01 260);
+  --primary:              var(--gold);
+  --primary-foreground:   var(--navy);
 
-  --muted:               oklch(0.22 0.09 255);
-  --muted-foreground:    oklch(0.60 0.03 260);
+  --secondary:            #edf0f7;
+  --secondary-foreground: #1e2535;
 
-  --accent:              oklch(0.72 0.16 85);
-  --accent-foreground:   oklch(0.10 0.04 255);
+  --muted:                #edf0f7;
+  --muted-foreground:     #64748b;
 
-  --destructive:         oklch(0.577 0.245 27.325);
+  --accent:               var(--gold);
+  --accent-foreground:    var(--navy);
 
-  --border:              oklch(0.28 0.07 255);
-  --input:               oklch(0.22 0.09 255);
-  --ring:                oklch(0.72 0.16 85);
+  --destructive:          oklch(0.577 0.245 27.325);
 
-  --radius: 0.5rem;
+  --border:               #e0e5ef;
+  --input:                #edf0f7;
+  --ring:                 var(--gold);
+
+  --radius: 0.625rem;
 
   /* Sidebar */
-  --sidebar:                    oklch(0.16 0.06 255);
-  --sidebar-foreground:         oklch(0.95 0.01 260);
-  --sidebar-primary:            oklch(0.72 0.16 85);
-  --sidebar-primary-foreground: oklch(0.10 0.04 255);
-  --sidebar-accent:             oklch(0.22 0.09 255);
-  --sidebar-accent-foreground:  oklch(0.95 0.01 260);
-  --sidebar-border:             oklch(0.28 0.07 255);
-  --sidebar-ring:               oklch(0.72 0.16 85);
+  --sidebar:                    #f6f8fc;
+  --sidebar-foreground:         #1e2535;
+  --sidebar-primary:            var(--gold);
+  --sidebar-primary-foreground: var(--navy);
+  --sidebar-accent:             #edf0f7;
+  --sidebar-accent-foreground:  #1e2535;
+  --sidebar-border:             #e0e5ef;
+  --sidebar-ring:               var(--gold);
 
   /* Charts */
-  --chart-1: oklch(0.72 0.16 85);
-  --chart-2: oklch(0.58 0.10 260);
-  --chart-3: oklch(0.46 0.13 260);
-  --chart-4: oklch(0.80 0.17 85);
-  --chart-5: oklch(0.38 0.14 260);
+  --chart-1: var(--gold);
+  --chart-2: var(--navy);
+  --chart-3: var(--navy-dk);
+  --chart-4: #f0c300;
+  --chart-5: #64748b;
 }
 
 /* ==============================================
@@ -182,13 +202,13 @@
   }
 
   ::-webkit-scrollbar       { width: 6px; }
-  ::-webkit-scrollbar-track { background: oklch(0.10 0.04 255); }
+  ::-webkit-scrollbar-track { background: #f6f8fc; }
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.30 0.12 260);
+    background: #c8d0e0;
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.63 0.14 85);
+    background: var(--gold);
   }
 }
 
@@ -198,34 +218,27 @@
 @layer utilities {
 
   .text-gold-gradient {
-    background: linear-gradient(135deg,
-      oklch(0.72 0.16 85) 0%,
-      oklch(0.87 0.14 85) 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--gold);
   }
 
   .bg-gradient-navy {
-    background: linear-gradient(135deg,
-      oklch(0.10 0.04 255) 0%,
-      oklch(0.22 0.09 255) 100%
-    );
+    background: var(--background);
   }
 
   .bg-gradient-hero {
-    background: linear-gradient(180deg,
-      oklch(0.10 0.04 255 / 0.6) 0%,
-      oklch(0.10 0.04 255 / 0.88) 100%
+    background: linear-gradient(to top,
+      rgba(11,34,56,.92) 0%,
+      rgba(0,0,0,.55) 50%,
+      rgba(11,34,56,.5) 100%
     );
   }
 
   .card-premium {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-premium);
+    border-radius: var(--r-sm);
+    box-shadow: var(--sh-sm);
+    transition: box-shadow 0.25s var(--ease), transform 0.25s var(--ease), border-color 0.25s var(--ease);
   }
 
   .container-shop {

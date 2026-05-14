@@ -11,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { items, shippingCountry, couponCode } = body;
+    const { items, shippingCountry, couponCode, shippingAddress: clientAddress } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Panier vide" }, { status: 400 });
@@ -117,7 +117,14 @@ export async function POST(request: NextRequest) {
 
     // Coupon 100% : bypass Stripe
     if (isFreeEverything) {
-      await adminSupabase.from("orders").update({ status: "paid" }).eq("id", order.id);
+      const savedAddress = clientAddress
+        ? { ...clientAddress, email: user?.email ?? "" }
+        : {};
+
+      await adminSupabase.from("orders").update({
+        status: "paid",
+        shipping_address: savedAddress,
+      }).eq("id", order.id);
 
       for (const item of items) {
         const product = products.find((p) => p.id === item.id);
@@ -136,6 +143,7 @@ export async function POST(request: NextRequest) {
         await sendOrderConfirmation({
           to: user.email,
           orderRef: order.id.slice(0, 8).toUpperCase(),
+          customerName: clientAddress?.full_name || undefined,
           items: items.map((i: { title: string; price: number; quantity: number }) => ({
             title: i.title,
             quantity: i.quantity,
@@ -146,6 +154,7 @@ export async function POST(request: NextRequest) {
           discountAmount,
           total: 0,
           couponCode: validCoupon?.code,
+          shippingAddress: clientAddress ?? undefined,
         });
       }
 

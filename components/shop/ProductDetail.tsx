@@ -5,15 +5,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, ChevronLeft, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ProductCard } from "@/components/shop/ProductCard";
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
 import type { Product } from "@/types/database";
 
 interface ProductDetailProps {
   product: Product;
+  relatedProducts?: Product[];
 }
 
-export function ProductDetail({ product }: ProductDetailProps) {
+export function ProductDetail({ product, relatedProducts = [] }: ProductDetailProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
@@ -57,7 +59,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
           {/* Images */}
           <div className="space-y-4">
             {/* Image principale */}
-            <div className="relative aspect-square bg-navy-800 rounded-lg overflow-hidden border border-border">
+            <div className="relative aspect-square bg-muted rounded-lg overflow-hidden border border-border">
               {mainImage ? (
                 <Image
                   src={mainImage}
@@ -74,8 +76,8 @@ export function ProductDetail({ product }: ProductDetailProps) {
               )}
 
               {isOutOfStock && (
-                <div className="absolute inset-0 bg-navy-950/70 flex items-center justify-center">
-                  <span className="bg-navy-800 text-muted-foreground text-sm font-medium px-4 py-2 rounded-full border border-border">
+                <div className="absolute inset-0 bg-foreground/60 flex items-center justify-center">
+                  <span className="bg-card text-muted-foreground text-sm font-medium px-4 py-2 rounded-full border border-border">
                     Rupture de stock
                   </span>
                 </div>
@@ -205,6 +207,34 @@ export function ProductDetail({ product }: ProductDetailProps) {
 
           </div>
         </div>
+
+        {/* Produits suggérés */}
+        {relatedProducts.length > 0 && (
+          <section className="mt-20 pt-12 border-t border-border">
+            <div className="flex items-end justify-between mb-8">
+              <div>
+                <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">
+                  Vous aimerez aussi
+                </p>
+                <h2 className="text-2xl font-bold text-foreground">
+                  Autres produits
+                </h2>
+              </div>
+              <Link
+                href="/shop"
+                className="hidden sm:inline-flex text-sm text-primary hover:text-[#e6a800] font-medium transition-colors"
+              >
+                Voir tout
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          </section>
+        )}
+
       </div>
     </main>
   );

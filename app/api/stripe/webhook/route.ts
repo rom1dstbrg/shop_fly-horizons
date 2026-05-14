@@ -48,32 +48,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
     }
 
-const shippingDetails = (session as unknown as Record<string, unknown>).shipping_details as {
-  name?: string;
-  address?: {
-    line1?: string;
-    line2?: string;
-    city?: string;
-    postal_code?: string;
-    country?: string;
-  };
-} | null;
+    // Récupère la session fraîche — shipping_details est dans collected_information (API 2026-04-22)
+    const fullSession = await stripe.checkout.sessions.retrieve(session.id) as Stripe.Checkout.Session;
 
-const shippingAddress = shippingDetails?.address
-  ? {
-      full_name: shippingDetails.name ?? "",
-      line1: shippingDetails.address.line1 ?? "",
-      line2: shippingDetails.address.line2 ?? "",
-      city: shippingDetails.address.city ?? "",
-      postal_code: shippingDetails.address.postal_code ?? "",
-      country: shippingDetails.address.country ?? "",
-    }
-  : order.shipping_address;
-      await adminSupabase
+    const shippingDetails = fullSession.collected_information?.shipping_details ?? null;
+    const customerEmail = fullSession.customer_details?.email ?? fullSession.customer_email ?? "";
+    const customerName = shippingDetails?.name || fullSession.customer_details?.name || undefined;
+
+    const shippingAddress = shippingDetails?.address
+      ? {
+          full_name: shippingDetails.name ?? "",
+          email: customerEmail,
+          line1: shippingDetails.address.line1 ?? "",
+          line2: shippingDetails.address.line2 ?? "",
+          city: shippingDetails.address.city ?? "",
+          postal_code: shippingDetails.address.postal_code ?? "",
+          country: shippingDetails.address.country ?? "",
+        }
+      : { ...order.shipping_address, email: customerEmail };
+
+    await adminSupabase
       .from("orders")
       .update({
         status: "paid",
-        stripe_payment_intent: session.payment_intent as string,
+        stripe_payment_intent: fullSession.payment_intent as string,
         shipping_address: shippingAddress,
       })
       .eq("id", orderId);
@@ -100,11 +98,11 @@ const shippingAddress = shippingDetails?.address
       });
     }
 
-    const customerEmail = session.customer_details?.email ?? session.customer_email;
     if (customerEmail) {
       await sendOrderConfirmation({
         to: customerEmail,
         orderRef: orderId.slice(0, 8).toUpperCase(),
+        customerName,
         items: order.items?.map((i: {
           title: string;
           quantity: number;
