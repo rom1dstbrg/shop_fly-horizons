@@ -48,19 +48,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
     }
 
-    const shippingDetails = session.shipping_details;
-    const shippingAddress = shippingDetails?.address
-      ? {
-          full_name: shippingDetails.name ?? "",
-          line1: shippingDetails.address.line1 ?? "",
-          line2: shippingDetails.address.line2 ?? "",
-          city: shippingDetails.address.city ?? "",
-          postal_code: shippingDetails.address.postal_code ?? "",
-          country: shippingDetails.address.country ?? "",
-        }
-      : order.shipping_address;
+const shippingDetails = (session as unknown as Record<string, unknown>).shipping_details as {
+  name?: string;
+  address?: {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    postal_code?: string;
+    country?: string;
+  };
+} | null;
 
-    await adminSupabase
+const shippingAddress = shippingDetails?.address
+  ? {
+      full_name: shippingDetails.name ?? "",
+      line1: shippingDetails.address.line1 ?? "",
+      line2: shippingDetails.address.line2 ?? "",
+      city: shippingDetails.address.city ?? "",
+      postal_code: shippingDetails.address.postal_code ?? "",
+      country: shippingDetails.address.country ?? "",
+    }
+  : order.shipping_address;
+      await adminSupabase
       .from("orders")
       .update({
         status: "paid",
