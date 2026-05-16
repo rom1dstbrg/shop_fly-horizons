@@ -1,19 +1,70 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Mail, MapPin } from "lucide-react";
+import { Mail, MapPin, Lock, Clock } from "lucide-react";
 
+// ── SVG brand icons (lucide doesn't ship these) ───────────────
+function IconFacebook({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
+    </svg>
+  );
+}
+function IconInstagram({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+// ── Data ──────────────────────────────────────────────────────
+const SERVICES = [
+  { href: "/nos-offres",     label: "Nos offres" },
+  { href: "/vol-sur-mesure", label: "Vol sur mesure" },
+  { href: "/vouchers",       label: "Vouchers cadeaux" },
+  { href: "/shop",           label: "Boutique" },
+];
+
+const PAGES = [
+  { href: "/contact", label: "Contact" },
+  { href: "/cgv",     label: "Conditions générales" },
+  { href: "/account", label: "Mon compte" },
+  { href: "/orders",  label: "Mes commandes" },
+];
+
+const SOCIALS = [
+  {
+    href:  "https://www.facebook.com/profile.php?id=61569809631946",
+    label: "Facebook",
+    icon:  <IconFacebook size={15} />,
+  },
+  {
+    href:  "https://www.instagram.com/fly_horizons_belgium/",
+    label: "Instagram",
+    icon:  <IconInstagram size={15} />,
+  },
+];
+
+// ── Component ─────────────────────────────────────────────────
 export function Footer() {
   const year = new Date().getFullYear();
+  const lnk  = "text-sm text-white/45 hover:text-white transition-colors";
+  const hd   = "text-[10px] font-bold text-white/25 uppercase tracking-[2px] mb-4";
 
   return (
-    <footer className="bg-navy-dk border-t border-border mt-auto">
-      <div className="container-shop py-12">
+    <footer className="bg-[#0b2238] border-t border-white/5 mt-auto">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-10 border-b border-border">
+        {/* ── Grille principale ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] gap-10 pb-10 border-b border-white/5">
 
-          {/* Marque */}
-          <div className="space-y-4">
-            <Link href="/">
+          {/* ── Marque ── */}
+          <div>
+            <Link href="/" className="inline-block">
               <Image
                 src="/logo-footer.png"
                 alt="Fly Horizons"
@@ -22,90 +73,90 @@ export function Footer() {
                 unoptimized
               />
             </Link>
-            <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-              Vols privés en avion léger au départ de Charleroi. Itinéraires sur mesure, vouchers cadeaux et accessoires.
+
+            <p className="text-white/45 text-sm leading-relaxed max-w-xs mt-6">
+              Des vols privés en avion léger, tracés par vous, payés à la minute.
             </p>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <MapPin size={13} className="text-primary shrink-0" />
-                Charleroi — EBCI, Belgique
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Mail size={13} className="text-primary shrink-0" />
-                <a href="mailto:info@fly-horizons.com" className="hover:text-primary transition-colors">
+
+            {/* Réseaux sociaux */}
+            <div className="mt-5 flex items-center gap-2">
+              {SOCIALS.map(({ href, label, icon }) => (
+                <a key={href} href={href} target="_blank" rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white/40 hover:text-white hover:bg-white/8 border border-white/8 hover:border-white/20 transition-all">
+                  {icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Nos services ── */}
+          <div>
+            <p className={hd}>Nos services</p>
+            <ul className="space-y-2.5">
+              {SERVICES.map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href} className={lnk}>{label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Pages utiles ── */}
+          <div>
+            <p className={hd}>Pages utiles</p>
+            <ul className="space-y-2.5">
+              {PAGES.map(({ href, label }) => (
+                <li key={href}>
+                  <Link href={href} className={lnk}>{label}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* ── Nous contacter ── */}
+          <div>
+            <p className={hd}>Nous contacter</p>
+            <div className="space-y-3">
+              <div className="flex items-start gap-2.5">
+                <Mail size={13} className="text-[#fbae17] shrink-0 mt-0.5" />
+                <a href="mailto:info@fly-horizons.com"
+                  className="text-sm text-white/45 hover:text-white transition-colors">
                   info@fly-horizons.com
                 </a>
+              </div>
+              <div className="flex items-start gap-2.5">
+                <MapPin size={13} className="text-[#fbae17] shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm text-white/45">Aéroport de Charleroi</p>
+                  <p className="text-xs text-white/25 mt-0.5">EBCI — Belgique</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <Clock size={13} className="text-[#fbae17] shrink-0" />
+                <p className="text-sm text-white/45">7j/7 sur réservation</p>
               </div>
             </div>
           </div>
 
-          {/* Explorer */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-foreground/50 uppercase tracking-widest">
-              Explorer
-            </p>
-            <ul className="space-y-2.5">
-              <li>
-                <Link href="/nos-offres" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Nos offres
-                </Link>
-              </li>
-              <li>
-                <Link href="/reservation" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Réserver
-                </Link>
-              </li>
-              <li>
-                <Link href="/vol-sur-mesure" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Vol sur mesure
-                </Link>
-              </li>
-              <li>
-                <Link href="/shop" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Boutique
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Aide */}
-          <div className="space-y-3">
-            <p className="text-xs font-semibold text-foreground/50 uppercase tracking-widest">
-              Aide
-            </p>
-            <ul className="space-y-2.5">
-              <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link href="/orders" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Mes commandes
-                </Link>
-              </li>
-              <li>
-                <Link href="/cart" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Mon panier
-                </Link>
-              </li>
-              <li>
-                <Link href="/cgv" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  Conditions générales
-                </Link>
-              </li>
-            </ul>
-          </div>
-
         </div>
 
-        <div className="pt-6 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-muted-foreground">
-            © {year} Fly Horizons — Romain DESTANBERG (BE.FCL.214192.A)
+        {/* ── Barre de bas ── */}
+        <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-white/25">
+            © {year} Fly Horizons. Tous droits réservés.
           </p>
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            Paiement sécurisé
-            <span className="text-primary font-semibold ml-1">Stripe</span>
+          <div className="flex items-center gap-4 text-xs text-white/25">
+            <div className="flex items-center gap-3">
+              <Link href="/cgv" className="hover:text-white/60 transition-colors">Conditions générales</Link>
+              <span>·</span>
+              <Link href="/contact" className="hover:text-white/60 transition-colors">Contact</Link>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Lock size={9} />
+              <span>Paiement sécurisé</span>
+              <span className="text-[#fbae17] font-semibold">Stripe</span>
+            </div>
           </div>
         </div>
 

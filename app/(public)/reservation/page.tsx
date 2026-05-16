@@ -6,7 +6,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import {
   ChevronLeft, ChevronRight, Clock, Lock,
-  CheckCircle, AlertCircle, Loader2, Tag, MapPin, Users, Calendar,
+  CheckCircle, AlertCircle, AlertTriangle, Loader2, Tag, MapPin, Users, Calendar,
 } from "lucide-react";
 import { formatDuration } from "@/lib/vouchers";
 
@@ -181,13 +181,18 @@ export default function ReservationPage() {
   // ── Computed ─────────────────────────────────────────────────────
   const { price, discount, full: prixPlein } = computePrice(form.product, form.voucher);
   const stepIndex = STEPS.findIndex(s => s.key === step);
+
+  const MAX_WEIGHT  = 178;
+  const weightKg    = parseInt(form.poids_total) || 0;
+  const weightWarn  = weightKg > MAX_WEIGHT && weightKg <= MAX_WEIGHT + 60;
+  const weightError = weightKg > MAX_WEIGHT + 60;
   const formattedDate = form.date
     ? new Date(form.date + "T12:00:00Z").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" })
     : null;
 
   const ctaDisabled =
     step === "datetime" ? !form.date || !form.heure :
-    step === "infos"    ? !form.prenom || !form.nom || !form.email || !form.poids_total || !form.passengers || vcLoading :
+    step === "infos"    ? !form.prenom || !form.nom || !form.email || !form.poids_total || !form.passengers || vcLoading || weightError :
                           !form.accept_cgp || submitting;
 
   function handleCTA() {
@@ -419,7 +424,19 @@ export default function ReservationPage() {
                             className="w-36 h-10 px-3 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all placeholder:text-muted-foreground/40" />
                           <span className="text-sm text-muted-foreground">kg</span>
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">Somme de tous — requis pour le calcul masse &amp; centrage.</p>
+                        <p className="mt-2 text-xs text-muted-foreground">Somme de tous — requis pour le calcul masse &amp; centrage (max {MAX_WEIGHT} kg).</p>
+                        {weightWarn && (
+                          <div className="mt-2.5 flex items-start gap-2.5 bg-amber-50 border border-amber-200 px-3.5 py-3 rounded-xl text-sm text-amber-800">
+                            <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-500" />
+                            <p>Le poids total dépasse la limite de {MAX_WEIGHT} kg. Le vol pourrait ne pas être possible dans ces conditions.</p>
+                          </div>
+                        )}
+                        {weightError && (
+                          <div className="mt-2.5 flex items-start gap-2.5 bg-red-50 border border-red-200 px-3.5 py-3 rounded-xl text-sm text-red-800">
+                            <AlertCircle size={14} className="shrink-0 mt-0.5 text-red-500" />
+                            <p>Poids trop élevé — le vol ne peut pas être effectué. Réduisez le nombre de passagers ou le chargement.</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

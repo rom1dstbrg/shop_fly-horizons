@@ -5,8 +5,8 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
   ChevronLeft, ChevronRight, Check, MapPin, Clock,
-  Tag, Lock, CheckCircle, AlertCircle, Loader2, Mail,
-  User, Phone, Trash2, PlaneTakeoff, Info, Shuffle, List, Route,
+  Tag, Lock, CheckCircle, AlertCircle, AlertTriangle, Loader2, Mail,
+  User, Trash2, PlaneTakeoff, Info, Shuffle, List, Route,
 } from "lucide-react";
 import type { LeafletMapHandle, RouteData, RouteMode, Stopover } from "@/components/vol-sur-mesure/LeafletMap";
 
@@ -53,6 +53,9 @@ const ESCALES_DISPO: Record<string, Stopover> = {
 
 const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
 const DAYS_FR   = ["L","M","M","J","V","S","D"];
+
+const MAX_WEIGHT = 178;   // kg — limite masse totale passagers
+const ERROR_KG   = MAX_WEIGHT + 60; // 238 kg — impossible
 
 // Hauteurs fixes pour aligner les éléments flottants
 const HEADER_H  = 86;  // top-3.5(14) + h-[60px] + gap(12) = top des steps bar
@@ -162,10 +165,10 @@ export default function VolSurMesurePage() {
         <button key={d} type="button" disabled={!isAvail || isPast}
           onClick={() => setForm(f => ({ ...f, date: ds, heure: "" }))}
           className={[
-            "h-10 w-full rounded-lg text-sm font-medium transition-all select-none",
-            isSel   ? "bg-primary text-primary-foreground shadow-sm" :
-            isAvail && !isPast ? "hover:bg-primary/10 text-foreground cursor-pointer" :
-            "text-muted-foreground/30 cursor-not-allowed",
+            "h-10 w-full rounded-lg text-sm font-medium transition-all duration-150 select-none flex items-center justify-center",
+            isSel              ? "bg-[#fbae17] text-[#0b2238] font-bold shadow-sm scale-105" :
+            isAvail && !isPast ? "hover:bg-[#fbae17]/10 hover:text-[#fbae17] text-foreground/70 cursor-pointer font-semibold" :
+                                 "text-muted-foreground/25 cursor-not-allowed text-xs",
           ].join(" ")}
         >{d}</button>
       );
@@ -231,6 +234,11 @@ export default function VolSurMesurePage() {
   const formattedDate = form.date
     ? new Date(form.date + "T12:00:00Z").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" })
     : null;
+
+  // Weight checks
+  const weightKg    = parseInt(form.poids_total) || 0;
+  const weightWarn  = weightKg > MAX_WEIGHT && weightKg <= ERROR_KG;
+  const weightError = weightKg > ERROR_KG;
 
   // ── Sidebar ───────────────────────────────────────────────
   function Sidebar() {
@@ -398,7 +406,7 @@ export default function VolSurMesurePage() {
 
               {/* ── Step 1 : Route ── toujours monté pour préserver la carte Leaflet */}
               <div style={{ display: step === "route" ? "block" : "none" }}>
-                <div className="bg-card rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--sh-sm)" }}>
+                <div className="rounded-2xl border border-border bg-white overflow-hidden" style={{ boxShadow: "var(--sh-sm)" }}>
 
                   {/* ── Barre de contrôle ── */}
                   <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/30">
@@ -408,7 +416,7 @@ export default function VolSurMesurePage() {
                         onClick={() => setRouteMode("optimized")}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                           routeMode === "optimized"
-                            ? "bg-primary text-primary-foreground shadow-sm"
+                            ? "bg-[#fbae17] text-[#0b2238] shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
@@ -419,7 +427,7 @@ export default function VolSurMesurePage() {
                         onClick={() => setRouteMode("manual")}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${
                           routeMode === "manual"
-                            ? "bg-primary text-primary-foreground shadow-sm"
+                            ? "bg-[#fbae17] text-[#0b2238] shadow-sm"
                             : "text-muted-foreground hover:text-foreground"
                         }`}
                       >
@@ -439,9 +447,6 @@ export default function VolSurMesurePage() {
 
                   {/* ── Map (hero) ── */}
                   <div className="relative" style={{ height: 520 }}>
-
-
-                    {/* Hint quand vide */}
                     {routeData.waypoints.length === 0 && (
                       <div className="absolute bottom-12 inset-x-0 flex justify-center z-[400] pointer-events-none">
                         <div className="bg-navy/80 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full font-medium">
@@ -449,7 +454,6 @@ export default function VolSurMesurePage() {
                         </div>
                       </div>
                     )}
-
                     <LeafletMap
                       ref={mapRef}
                       stopovers={activeStopovers}
@@ -489,15 +493,15 @@ export default function VolSurMesurePage() {
                           return (
                             <button key={so.icao} type="button" onClick={() => toggleStopover(so.icao)}
                               className={[
-                                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all",
+                                "flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all cursor-pointer",
                                 active
-                                  ? "border-primary bg-primary/8 text-primary"
-                                  : "border-border hover:border-primary/40 text-muted-foreground hover:text-foreground",
+                                  ? "border-[#fbae17] bg-[#fbae17]/10 text-[#fbae17]"
+                                  : "border-border hover:border-[#fbae17]/40 text-muted-foreground hover:text-foreground",
                               ].join(" ")}>
                               <PlaneTakeoff size={12} />
                               <span>{so.icao}</span>
                               <span className="text-xs opacity-60">+{so.taxe}€</span>
-                              {active && <Check size={10} className="text-primary" />}
+                              {active && <Check size={10} className="text-[#fbae17]" />}
                             </button>
                           );
                         })}
@@ -524,7 +528,7 @@ export default function VolSurMesurePage() {
                         type="button"
                         disabled={routeData.waypoints.length === 0}
                         onClick={() => setStep("date-time")}
-                        className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-40 transition-all"
+                        className="w-full h-11 rounded-xl bg-[#113356] text-white font-bold text-sm flex items-center justify-center gap-2 hover:bg-[#0b2238] disabled:opacity-30 shadow-sm transition-all cursor-pointer"
                       >
                         <Route size={14} /> Choisir la date & l&apos;heure <ChevronRight size={15} />
                       </button>
@@ -540,83 +544,94 @@ export default function VolSurMesurePage() {
 
               {/* ── Step 2 : Date & heure ── */}
               {step === "date-time" && (
-                <div className="bg-card rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--sh-sm)" }}>
-                  <div className="px-6 pt-6 pb-4 border-b border-border">
-                    <h2 className="text-lg font-bold text-foreground">Date & heure du vol</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Sélectionnez un jour disponible puis un créneau.</p>
+                <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+
+                  <div className="p-5 border-b border-border">
+                    <div className="inline-flex items-center gap-2 mb-1">
+                      <Clock size={12} className="text-muted-foreground" />
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">Calendrier</p>
+                    </div>
+                    <h2 className="text-base font-extrabold text-foreground">Date & heure du vol</h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Sélectionnez un jour disponible puis un créneau.</p>
                   </div>
 
-                  <div className="px-6 py-5">
+                  <div className="p-5">
                     <div className="flex items-center justify-between mb-4">
                       <button type="button"
                         onClick={() => { if (calMonth === 1) { setCalMonth(12); setCalYear(y => y - 1); } else setCalMonth(m => m - 1); }}
-                        className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-secondary transition-colors">
-                        <ChevronLeft size={16} />
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border cursor-pointer">
+                        <ChevronLeft size={15} />
                       </button>
-                      <span className="text-sm font-semibold">{MONTHS_FR[calMonth - 1]} {calYear}</span>
+                      <span className="text-sm font-bold text-foreground">{MONTHS_FR[calMonth - 1]} {calYear}</span>
                       <button type="button"
                         onClick={() => { if (calMonth === 12) { setCalMonth(1); setCalYear(y => y + 1); } else setCalMonth(m => m + 1); }}
-                        className="w-9 h-9 rounded-lg border border-border flex items-center justify-center hover:bg-secondary transition-colors">
-                        <ChevronRight size={16} />
+                        className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-all border border-border cursor-pointer">
+                        <ChevronRight size={15} />
                       </button>
                     </div>
-                    <div className="grid grid-cols-7 gap-0.5 mb-0.5">
+                    <div className="grid grid-cols-7 mb-1">
                       {DAYS_FR.map((d, i) => (
-                        <div key={i} className="text-center text-xs font-semibold text-muted-foreground py-1.5">{d}</div>
+                        <div key={i} className="h-8 flex items-center justify-center text-[9px] font-bold text-muted-foreground uppercase tracking-wider">{d}</div>
                       ))}
                     </div>
-                    {calLoading ? (
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 size={20} className="animate-spin text-muted-foreground" />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-7 gap-0.5">{renderCalendar()}</div>
-                    )}
-                    <div className="flex items-center gap-5 mt-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary/20 border border-primary/40 inline-block" />Disponible</span>
-                      <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full bg-primary inline-block" />Sélectionné</span>
+                    {calLoading
+                      ? <div className="flex items-center justify-center h-44"><Loader2 size={20} className="animate-spin text-muted-foreground/30" /></div>
+                      : <div className="grid grid-cols-7 gap-0.5">{renderCalendar()}</div>
+                    }
+                    <div className="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-border text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-[#fbae17]" />Sélectionné</span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full border-2 border-border" />Disponible</span>
+                      <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-full bg-muted" />Indisponible</span>
                     </div>
                   </div>
 
                   {form.date && (
-                    <div className="px-6 pb-5 pt-4 border-t border-border">
-                      <p className="text-sm font-semibold text-foreground mb-3">
-                        Créneaux —{" "}
-                        <span className="font-normal text-muted-foreground capitalize">
-                          {new Date(form.date + "T12:00:00Z").toLocaleDateString("fr-BE", { weekday: "long", day: "numeric", month: "long" })}
-                        </span>
-                      </p>
+                    <div className="border-t border-border p-5">
                       {slotsLoading ? (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground py-2">
-                          <Loader2 size={14} className="animate-spin" /> Chargement…
+                        <div className="flex items-center justify-center py-4">
+                          <Loader2 size={18} className="animate-spin text-muted-foreground/30" />
                         </div>
                       ) : slots.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">Aucun créneau disponible ce jour.</p>
+                        <div className="flex items-center gap-3 py-1">
+                          <Clock size={14} className="text-muted-foreground/40 shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold text-foreground capitalize">{formattedDate}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">Aucun créneau disponible — essayez une autre date</p>
+                          </div>
+                        </div>
                       ) : (
-                        <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-                          {slots.map(s => (
-                            <button key={s} type="button"
-                              onClick={() => setForm(f => ({ ...f, heure: s }))}
-                              className={[
-                                "py-2.5 rounded-lg text-sm font-semibold border-2 transition-all",
-                                form.heure === s ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary/50 hover:bg-secondary/50",
-                              ].join(" ")}
-                            >{s}</button>
-                          ))}
+                        <div>
+                          <div className="flex items-baseline gap-2 mb-3">
+                            <p className="text-sm font-extrabold text-foreground capitalize">{formattedDate}</p>
+                          </div>
+                          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+                            {slots.map(s => (
+                              <button key={s} type="button"
+                                onClick={() => setForm(f => ({ ...f, heure: s }))}
+                                className={[
+                                  "py-2.5 rounded-xl border text-sm font-bold transition-all duration-150 text-center cursor-pointer",
+                                  form.heure === s
+                                    ? "border-[#fbae17] bg-[#fbae17] text-[#0b2238] shadow-sm"
+                                    : "border-border text-foreground hover:border-[#fbae17]/50 hover:bg-[#fbae17]/5 hover:text-[#fbae17]",
+                                ].join(" ")}
+                              >{s}</button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
                   )}
 
-                  <div className="px-6 pb-6 flex gap-3">
+                  <div className="p-5 pt-4 flex items-center justify-between gap-4">
                     <button type="button" onClick={() => setStep("route")}
-                      className="flex-1 h-12 rounded-xl border border-border text-sm font-semibold flex items-center justify-center gap-2 hover:bg-secondary transition-colors">
-                      <ChevronLeft size={16} /> Retour
+                      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group">
+                      <ChevronLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
+                      Retour
                     </button>
                     <button type="button" disabled={!form.date || !form.heure}
                       onClick={() => setStep("details")}
-                      className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-40 transition-all">
-                      Continuer <ChevronRight size={16} />
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#113356] text-white rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-30 hover:bg-[#0b2238] shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 cursor-pointer">
+                      Continuer <ChevronRight size={15} />
                     </button>
                   </div>
                 </div>
@@ -624,122 +639,146 @@ export default function VolSurMesurePage() {
 
               {/* ── Step 3 : Informations ── */}
               {step === "details" && (
-                <div className="bg-card rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--sh-sm)" }}>
-                  <div className="px-6 pt-6 pb-4 border-b border-border">
-                    <h2 className="text-lg font-bold text-foreground">Vos informations</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Ces informations permettent de préparer votre vol et d&apos;envoyer votre confirmation.</p>
+                <div className="rounded-2xl border border-border bg-white shadow-sm divide-y divide-border overflow-hidden">
+
+                  {/* Header */}
+                  <div className="p-5">
+                    <div className="inline-flex items-center gap-2 mb-1">
+                      <User size={12} className="text-muted-foreground" />
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">Informations</p>
+                    </div>
+                    <h2 className="text-base font-extrabold text-foreground">Vos informations</h2>
+                    <p className="text-sm text-muted-foreground mt-0.5">Ces informations permettent de préparer votre vol et d&apos;envoyer votre confirmation.</p>
                   </div>
 
-                  <div className="px-6 py-5 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {[
-                        { label: "Prénom", key: "prenom", placeholder: "Jean", required: true },
-                        { label: "Nom",    key: "nom",    placeholder: "Dupont", required: true },
-                      ].map(({ label, key, placeholder, required }) => (
-                        <div key={key}>
-                          <label className="block text-sm font-medium text-foreground mb-1.5">{label} {required && <span className="text-destructive">*</span>}</label>
-                          <input type="text" value={form[key as keyof FormData] as string} required={required}
-                            onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-                            className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                            placeholder={placeholder} />
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">
-                          <Mail size={12} className="inline mr-1" />Email <span className="text-destructive">*</span>
-                        </label>
-                        <input type="email" value={form.email} required onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                          className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                          placeholder="jean@exemple.com" />
+                  {/* Coordonnées */}
+                  <div className="p-5 sm:p-7">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px] mb-4">Coordonnées</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <VSMField label="Prénom" required value={form.prenom} onChange={v => setForm(f => ({ ...f, prenom: v }))} placeholder="Jean" />
+                      <VSMField label="Nom" required value={form.nom} onChange={v => setForm(f => ({ ...f, nom: v }))} placeholder="Dupont" />
+                      <div className="sm:col-span-2">
+                        <VSMField label="Email" required type="email" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} placeholder="jean@exemple.com" />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">
-                          <Phone size={12} className="inline mr-1" />Téléphone
-                        </label>
-                        <input type="tel" value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))}
-                          className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                          placeholder="+32 470 00 00 00" />
+                      <div className="sm:col-span-2">
+                        <VSMField label="Téléphone" type="tel" value={form.telephone} onChange={v => setForm(f => ({ ...f, telephone: v }))} placeholder="+32 470 00 00 00" />
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">Passagers <span className="text-destructive">*</span></label>
-                        <select value={form.passagers} onChange={e => setForm(f => ({ ...f, passagers: e.target.value }))}
-                          className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                          <option value="1">1 passager</option>
-                          <option value="2">2 passagers</option>
-                          <option value="3">3 passagers</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-foreground mb-1.5">Poids total (kg) <span className="text-destructive">*</span></label>
-                        <input type="number" value={form.poids_total} required min={1} max={500}
-                          onChange={e => setForm(f => ({ ...f, poids_total: e.target.value }))}
-                          className="w-full h-11 px-3 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                          placeholder="ex : 165" />
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground -mt-2">Poids cumulé de tous les passagers — requis pour le calcul masse &amp; centrage (max 178 kg).</p>
-
-                    <div>
-                      <label className="block text-sm font-medium text-foreground mb-1.5">Remarques <span className="text-muted-foreground font-normal">(optionnel)</span></label>
-                      <textarea value={form.commentaire} rows={3}
-                        onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
-                        className="w-full px-3 py-2.5 rounded-lg border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
-                        placeholder="Lieux à survoler, occasion spéciale, questions…" />
-                    </div>
-
-                    {/* Voucher */}
-                    <div className="pt-2 border-t border-border">
-                      <label className="block text-sm font-medium text-foreground mb-1.5">
-                        <Tag size={12} className="inline mr-1" />Voucher <span className="text-muted-foreground font-normal">(optionnel)</span>
-                      </label>
-                      <div className="flex gap-2">
-                        <input type="text" value={form.voucherInput}
-                          onChange={e => { setForm(f => ({ ...f, voucherInput: e.target.value.toUpperCase(), voucher: null })); setVoucherError(""); }}
-                          onKeyDown={e => e.key === "Enter" && validateVoucher()}
-                          className="flex-1 h-11 px-3 rounded-lg border border-input bg-background text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring uppercase tracking-widest"
-                          placeholder="FH-XXXX-XXXX" />
-                        <button type="button" onClick={validateVoucher}
-                          disabled={!form.voucherInput.trim() || voucherLoading}
-                          className="px-4 h-11 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-1.5">
-                          {voucherLoading ? <Loader2 size={14} className="animate-spin" /> : "Vérifier"}
-                        </button>
-                      </div>
-                      {voucherError && (
-                        <p className="mt-1.5 text-sm text-destructive flex items-center gap-1">
-                          <AlertCircle size={13} /> {voucherError}
-                        </p>
-                      )}
-                      {form.voucher && (
-                        <div className="mt-2 flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2.5 rounded-lg border border-green-200">
-                          <CheckCircle size={14} />
-                          <span><strong>{form.voucher.product_title}</strong> — {form.voucher.duration_minutes} min couverts</span>
-                        </div>
-                      )}
-                      {form.voucher && dureMin > 0 && (
-                        <p className="mt-1.5 text-xs text-muted-foreground">
-                          Voucher couvre {Math.min(form.voucher.duration_minutes, dureMin)} min sur ~{dureMin} min estimés.
-                          {billableMin > 0 ? ` Reste ${billableMin} min à facturer.` : " Vol entièrement couvert !"}
-                        </p>
-                      )}
                     </div>
                   </div>
 
-                  <div className="px-6 pb-6 flex gap-3">
+                  {/* Détails du vol */}
+                  <div className="p-5 sm:p-7">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px] mb-4">Détails du vol</p>
+                    <div className="space-y-5">
+
+                      {/* Passagers */}
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-3">
+                          Nombre de passagers <span className="text-muted-foreground font-normal">(requis)</span>
+                        </label>
+                        <div className="flex gap-2.5">
+                          {["1", "2", "3"].map(n => (
+                            <button key={n} type="button"
+                              onClick={() => setForm(f => ({ ...f, passagers: n }))}
+                              className={[
+                                "flex-1 py-2.5 rounded-xl border text-sm font-semibold transition-all duration-150 text-center cursor-pointer",
+                                form.passagers === n
+                                  ? "border-[#fbae17] bg-[#fbae17] text-[#0b2238] shadow-sm"
+                                  : "border-border text-foreground hover:border-[#fbae17]/50 hover:bg-[#fbae17]/5 hover:text-[#fbae17]",
+                              ].join(" ")}
+                            >
+                              {n} {n === "1" ? "passager" : "passagers"}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Poids */}
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-2">
+                          Poids total des passagers <span className="text-muted-foreground font-normal">(kg, requis)</span>
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input type="number" value={form.poids_total} required min={1} max={500} placeholder="ex : 165"
+                            onChange={e => setForm(f => ({ ...f, poids_total: e.target.value }))}
+                            className="w-36 h-10 px-3 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all placeholder:text-muted-foreground/40" />
+                          <span className="text-sm text-muted-foreground">kg</span>
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">Poids cumulé de tous les passagers — requis pour le calcul masse &amp; centrage (max {MAX_WEIGHT} kg).</p>
+                        {weightWarn && (
+                          <div className="mt-2.5 flex items-start gap-2.5 bg-amber-50 border border-amber-200 px-3.5 py-3 rounded-xl text-sm text-amber-800">
+                            <AlertTriangle size={14} className="shrink-0 mt-0.5 text-amber-500" />
+                            <p>Le poids total dépasse la limite de {MAX_WEIGHT} kg. Le vol pourrait ne pas être possible dans ces conditions.</p>
+                          </div>
+                        )}
+                        {weightError && (
+                          <div className="mt-2.5 flex items-start gap-2.5 bg-red-50 border border-red-200 px-3.5 py-3 rounded-xl text-sm text-red-800">
+                            <AlertCircle size={14} className="shrink-0 mt-0.5 text-red-500" />
+                            <p>Poids trop élevé — le vol ne peut pas être effectué. Réduisez le nombre de passagers ou le chargement.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Remarques */}
+                      <div>
+                        <label className="block text-sm font-semibold text-foreground mb-2">
+                          Remarques <span className="text-muted-foreground font-normal">(optionnel)</span>
+                        </label>
+                        <textarea value={form.commentaire} rows={3}
+                          onChange={e => setForm(f => ({ ...f, commentaire: e.target.value }))}
+                          className="w-full px-3 py-3 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all resize-none placeholder:text-muted-foreground/40"
+                          placeholder="Lieux à survoler, occasion spéciale, questions…" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Voucher */}
+                  <div className="p-5 sm:p-7">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px] mb-1.5">Bon de vol cadeau</p>
+                    <p className="text-sm text-muted-foreground mb-4">Vous avez un voucher ? Saisissez votre code ci-dessous.</p>
+                    <div className="flex gap-2.5">
+                      <input type="text" value={form.voucherInput}
+                        onChange={e => { setForm(f => ({ ...f, voucherInput: e.target.value.toUpperCase(), voucher: null })); setVoucherError(""); }}
+                        onKeyDown={e => e.key === "Enter" && validateVoucher()}
+                        className="flex-1 h-10 px-3 rounded-xl border border-border bg-white text-sm font-mono uppercase tracking-widest text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all placeholder:text-muted-foreground/40 placeholder:tracking-normal placeholder:font-sans"
+                        placeholder="FH-XXXX-XXXX" />
+                      <button type="button" onClick={validateVoucher}
+                        disabled={!form.voucherInput.trim() || voucherLoading}
+                        className="px-4 h-10 rounded-xl border border-border bg-muted text-sm font-semibold text-foreground hover:bg-[#fbae17]/5 hover:border-[#fbae17]/40 hover:text-[#fbae17] disabled:opacity-40 transition-all flex items-center gap-1.5 cursor-pointer">
+                        {voucherLoading ? <Loader2 size={13} className="animate-spin" /> : <><Tag size={12} />Appliquer</>}
+                      </button>
+                    </div>
+                    {voucherError && (
+                      <p className="mt-2.5 text-sm text-destructive flex items-center gap-1.5">
+                        <AlertCircle size={13} className="shrink-0" /> {voucherError}
+                      </p>
+                    )}
+                    {form.voucher && (
+                      <div className="mt-2.5 inline-flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 px-3.5 py-2 rounded-xl">
+                        <CheckCircle size={13} />
+                        <span><strong>{form.voucher.product_title}</strong> — {form.voucher.duration_minutes} min couverts</span>
+                      </div>
+                    )}
+                    {form.voucher && dureMin > 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Voucher couvre {Math.min(form.voucher.duration_minutes, dureMin)} min sur ~{dureMin} min estimés.
+                        {billableMin > 0 ? ` Reste ${billableMin} min à facturer.` : " Vol entièrement couvert !"}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Nav */}
+                  <div className="p-5 flex items-center justify-between gap-4">
                     <button type="button" onClick={() => setStep("date-time")}
-                      className="flex-1 h-12 rounded-xl border border-border text-sm font-semibold flex items-center justify-center gap-2 hover:bg-secondary transition-colors">
-                      <ChevronLeft size={16} /> Retour
+                      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group">
+                      <ChevronLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
+                      Retour
                     </button>
                     <button type="button"
-                      disabled={!form.prenom || !form.nom || !form.email || !form.poids_total}
+                      disabled={!form.prenom || !form.nom || !form.email || !form.poids_total || weightError}
                       onClick={() => setStep("confirm")}
-                      className="flex-1 h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-40 transition-all">
-                      Continuer <ChevronRight size={16} />
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#113356] text-white rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-30 hover:bg-[#0b2238] shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 cursor-pointer">
+                      Continuer <ChevronRight size={15} />
                     </button>
                   </div>
                 </div>
@@ -747,97 +786,121 @@ export default function VolSurMesurePage() {
 
               {/* ── Step 4 : Confirmer ── */}
               {step === "confirm" && (
-                <div className="bg-card rounded-2xl border border-border overflow-hidden" style={{ boxShadow: "var(--sh-sm)" }}>
-                  <div className="px-6 pt-6 pb-4 border-b border-border">
-                    <h2 className="text-lg font-bold text-foreground">Récapitulatif & confirmation</h2>
-                    <p className="text-sm text-muted-foreground mt-1">Vérifiez votre demande avant de confirmer.</p>
-                  </div>
+                <div className="space-y-4">
 
-                  <div className="px-6 py-5 space-y-4">
-                    <div className="bg-secondary/40 rounded-xl p-4 space-y-2">
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-3">Vos informations</p>
-                      <div className="flex items-center gap-2.5 text-sm"><User size={14} className="text-muted-foreground" /><span className="font-semibold">{form.prenom} {form.nom}</span></div>
-                      <div className="flex items-center gap-2.5 text-sm"><Mail size={14} className="text-muted-foreground" /><span className="text-muted-foreground">{form.email}</span></div>
-                      <div className="flex items-center gap-2.5 text-sm"><Route size={14} className="text-muted-foreground" /><span className="text-muted-foreground">{routeData.distKm} km · ~{dureMin} min · {routeData.waypoints.length} point{routeData.waypoints.length > 1 ? "s" : ""}</span></div>
-                    </div>
-
-                    <div className="rounded-xl border border-border overflow-hidden">
-                      <div className="px-4 py-3 bg-muted/30 border-b border-border">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">Détail du prix</p>
+                  {/* Recap card */}
+                  <div className="rounded-2xl border border-border bg-white shadow-sm overflow-hidden">
+                    <div className="bg-[#0b2238] px-6 py-6 flex items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[#fbae17] text-[9px] font-black tracking-[3px] uppercase mb-3">Fly Horizons</p>
+                        <h2 className="text-white text-base font-extrabold leading-snug">Vol sur mesure</h2>
+                        <p className="text-white/50 text-sm mt-1.5 capitalize">
+                          {formattedDate}{form.heure && ` · ${form.heure}`}
+                        </p>
                       </div>
-                      <div className="p-4 space-y-2.5">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Prix estimé du vol (~{dureMin} min)</span>
-                          <span className="font-medium">{prixEstime} €</span>
-                        </div>
-                        {discount > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-green-600">Voucher ({form.voucher?.duration_minutes} min)</span>
-                            <span className="text-green-600 font-semibold">−{discount} €</span>
-                          </div>
-                        )}
-                        {taxes > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Taxes d&apos;atterrissage</span>
-                            <span className="font-medium">{taxes} €</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between items-center pt-3 border-t border-border">
-                          <div>
-                            <p className="font-semibold text-sm text-foreground">Acompte à régler</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">Solde après le vol selon la durée réelle</p>
-                          </div>
-                          <span className={`text-2xl font-bold ${totalAcompte === 0 ? "text-green-600" : "text-primary"}`}>
-                            {totalAcompte === 0 ? "Gratuit" : `${totalAcompte} €`}
+                      {dureMin > 0 && (
+                        <div className="text-right shrink-0">
+                          <p className="text-white/30 text-[9px] uppercase tracking-widest mb-1">Durée est.</p>
+                          <span className="bg-[#fbae17] text-[#0b2238] text-sm font-bold px-3 py-1 rounded-full">
+                            ~{dureMin} min
                           </span>
                         </div>
+                      )}
+                    </div>
+
+                    <div className="px-6 py-5 grid grid-cols-2 gap-x-6 gap-y-4 border-b border-border">
+                      {[
+                        { l: "Passager principal", v: `${form.prenom} ${form.nom}` },
+                        { l: "Email",              v: form.email },
+                        { l: "Passagers / Masse",  v: `${form.passagers} pax · ${form.poids_total} kg` },
+                        { l: "Distance",           v: `${routeData.distKm} km · ${routeData.waypoints.length} pts` },
+                      ].map(({ l, v }) => (
+                        <div key={l}>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[2px] mb-0.5">{l}</p>
+                          <p className="text-sm font-semibold text-foreground truncate">{v}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="px-6 py-5 space-y-2 border-b border-border">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Prix estimé du vol (~{dureMin} min)</span>
+                        <span className="font-medium">{prixEstime} €</span>
+                      </div>
+                      {discount > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-green-600">Voucher ({form.voucher?.duration_minutes} min)</span>
+                          <span className="text-green-600 font-semibold">−{discount} €</span>
+                        </div>
+                      )}
+                      {taxes > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Taxes d&apos;atterrissage</span>
+                          <span className="font-medium">{taxes} €</span>
+                        </div>
+                      )}
+                      <div className="flex items-end justify-between pt-3 border-t border-border">
+                        <div>
+                          <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-[2px] mb-0.5">Acompte à régler</p>
+                          <p className="text-xs text-muted-foreground">Solde après le vol selon la durée réelle</p>
+                        </div>
+                        <span className={`text-3xl font-black tabular-nums ${totalAcompte === 0 ? "text-green-600" : "text-[#113356]"}`}>
+                          {totalAcompte === 0 ? "Gratuit" : `${totalAcompte} €`}
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3.5">
-                      <Mail size={15} className="text-blue-600 mt-0.5 shrink-0" />
-                      <p className="text-sm text-blue-800 leading-relaxed">
-                        {totalAcompte > 0
-                          ? `Après confirmation, vous recevrez un email à ${form.email} avec un lien sécurisé pour payer l'acompte de ${totalAcompte} €.`
-                          : `Votre vol est entièrement couvert par votre voucher. Un email de confirmation vous sera envoyé à ${form.email}.`
-                        }
-                      </p>
+                    <div className="px-6 py-4">
+                      <div className="flex items-start gap-2.5 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+                        <Mail size={13} className="text-blue-600 mt-0.5 shrink-0" />
+                        <p className="text-sm text-blue-800 leading-relaxed">
+                          {totalAcompte > 0
+                            ? `Après confirmation, vous recevrez un email à ${form.email} avec un lien sécurisé pour payer l'acompte de ${totalAcompte} €.`
+                            : `Votre vol est entièrement couvert par votre voucher. Un email de confirmation vous sera envoyé à ${form.email}.`
+                          }
+                        </p>
+                      </div>
                     </div>
+                  </div>
 
-                    <label className="flex items-start gap-3 cursor-pointer">
+                  {/* CGP */}
+                  <div className="rounded-2xl border border-border bg-white shadow-sm p-5">
+                    <label className="flex items-start gap-3.5 cursor-pointer">
                       <input type="checkbox" checked={form.accept_cgp}
                         onChange={e => setForm(f => ({ ...f, accept_cgp: e.target.checked }))}
-                        className="mt-0.5 w-4 h-4 accent-primary flex-shrink-0 rounded" />
+                        className="mt-0.5 w-4 h-4 accent-[#113356] shrink-0 cursor-pointer" />
                       <span className="text-sm text-muted-foreground leading-relaxed">
                         J&apos;accepte les{" "}
                         <a href="https://fly-horizons.com/cgp.html" target="_blank" rel="noopener noreferrer"
-                          className="text-primary underline underline-offset-2 font-medium">
+                          className="text-[#113356] underline underline-offset-2 font-semibold">
                           Conditions Générales de Participation
                         </a>{" "}
                         et que mes données soient utilisées pour traiter ma réservation.
                       </span>
                     </label>
-
-                    {submitError && (
-                      <p className="text-sm text-destructive flex items-center gap-1.5">
-                        <AlertCircle size={14} /> {submitError}
-                      </p>
-                    )}
                   </div>
 
-                  <div className="px-6 pb-6 flex gap-3">
+                  {submitError && (
+                    <div className="flex items-center gap-2.5 text-sm text-destructive bg-destructive/5 border border-destructive/20 px-4 py-3.5 rounded-xl">
+                      <AlertCircle size={14} className="shrink-0" /> {submitError}
+                    </div>
+                  )}
+
+                  {/* Nav */}
+                  <div className="flex items-center justify-between gap-4">
                     <button type="button" onClick={() => setStep("details")}
-                      className="flex-1 h-12 rounded-xl border border-border text-sm font-semibold flex items-center justify-center gap-2 hover:bg-secondary transition-colors">
-                      <ChevronLeft size={16} /> Retour
+                      className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer group">
+                      <ChevronLeft size={15} className="group-hover:-translate-x-0.5 transition-transform" />
+                      Retour
                     </button>
                     <button type="button" disabled={!form.accept_cgp || submitting} onClick={handleSubmit}
-                      className="flex-grow h-12 rounded-xl bg-primary text-primary-foreground font-semibold text-sm flex items-center justify-center gap-2 hover:bg-primary/90 disabled:opacity-40 transition-all">
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-[#113356] text-white rounded-xl text-sm font-bold transition-all duration-200 disabled:opacity-30 hover:bg-[#0b2238] shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 cursor-pointer">
                       {submitting ? (
-                        <><Loader2 size={16} className="animate-spin" /> Envoi en cours…</>
+                        <><Loader2 size={14} className="animate-spin" /> Envoi en cours…</>
                       ) : totalAcompte === 0 ? (
-                        <><CheckCircle size={16} /> Confirmer mon vol</>
+                        <><CheckCircle size={13} /> Confirmer mon vol</>
                       ) : (
-                        <><Mail size={15} /> Recevoir le lien de paiement</>
+                        <><Mail size={13} /> Recevoir le lien de paiement</>
                       )}
                     </button>
                   </div>
@@ -893,7 +956,7 @@ export default function VolSurMesurePage() {
                     Le solde sera réglé après le vol selon la durée réelle.
                   </p>
                   <a href="/"
-                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold hover:bg-primary/90 transition-colors">
+                    className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#113356] text-white rounded-xl text-sm font-bold hover:bg-[#0b2238] shadow-sm transition-all">
                     Retour à l&apos;accueil
                   </a>
                 </div>
@@ -908,6 +971,23 @@ export default function VolSurMesurePage() {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Helper ────────────────────────────────────────────────────────────
+function VSMField({ label, required, type = "text", value, onChange, placeholder }: {
+  label: string; required?: boolean; type?: string;
+  value: string; onChange: (v: string) => void; placeholder?: string;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-semibold text-foreground mb-2">
+        {label}{required && <span className="text-muted-foreground font-normal"> *</span>}
+      </label>
+      <input type={type} value={value} required={required} placeholder={placeholder}
+        onChange={e => onChange(e.target.value)}
+        className="w-full h-10 px-3 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all placeholder:text-muted-foreground/40" />
     </div>
   );
 }

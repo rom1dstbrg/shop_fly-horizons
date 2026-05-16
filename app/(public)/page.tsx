@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Gift, Route, Lock, Mail, Package, BadgeCheck, Clock, MapPin, Users, Sparkles } from "lucide-react";
+import { ChevronDown, Gift, Route, Lock, Mail, Package, BadgeCheck, Clock, MapPin, Users, Sparkles, PlaneTakeoff } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { FeaturedProducts } from "@/components/shop/FeaturedProducts";
 import { formatDuration } from "@/lib/vouchers";
@@ -40,21 +40,21 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent" />
 
         <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4 pb-16 pt-[76px]">
-          <div className="inline-flex items-center gap-2 bg-[#F2B705]/15 border border-[#F2B705]/35 rounded-full px-5 py-2 mb-8 backdrop-blur-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#F2B705] animate-pulse" />
-            <span className="text-[#F2B705] text-xs font-bold tracking-[2.5px] uppercase">
-              Paiements sécurisés
+          <div className="inline-flex items-center gap-2 bg-[#F2B705] rounded-full px-5 py-2 mb-8 shadow-[0_4px_20px_rgba(242,183,5,.4)]">
+            <PlaneTakeoff size={13} className="text-[#113356]" />
+            <span className="text-[#113356] text-xs font-bold tracking-[2.5px] uppercase">
+              Vols privés en avion léger
             </span>
           </div>
 
           <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-[80px] font-extrabold text-white leading-[1.0] tracking-tight mb-6 drop-shadow-lg">
-            Survolez la Belgique<br />
+            Survolez le monde<br />
             <span className="text-[#F2B705]">à votre façon.</span>
           </h1>
 
           <p className="text-white/75 text-base sm:text-lg md:text-xl leading-relaxed max-w-xl mb-10 font-light">
-            Vols privés en avion léger, itinéraires sur mesure et accessoires.<br className="hidden sm:block" />
-            Une expérience unique au départ de Charleroi.
+            Admirez ce que vous voulez depuis le ciel,<br className="hidden sm:block" />
+            exactement comme vous l&apos;avez rêvé.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">

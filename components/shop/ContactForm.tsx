@@ -32,60 +32,44 @@ export function ContactForm() {
     });
   }
 
+  const cls = "w-full h-10 px-3 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all placeholder:text-muted-foreground/40";
+  const lbl = "block text-sm font-semibold text-foreground mb-2";
+  const req = <span className="text-muted-foreground font-normal"> *</span>;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">
-            Nom complet <span className="text-destructive">*</span>
-          </label>
-          <input
-            name="nom" required
-            placeholder="Jean Dupont"
-            className="w-full h-11 px-3.5 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <label className={lbl}>Nom complet{req}</label>
+          <input name="nom" required placeholder="Jean Dupont" className={cls} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-foreground mb-1.5">
-            Adresse email <span className="text-destructive">*</span>
-          </label>
-          <input
-            name="email" type="email" required
-            placeholder="jean@exemple.com"
-            className="w-full h-11 px-3.5 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          />
+          <label className={lbl}>Adresse email{req}</label>
+          <input name="email" type="email" required placeholder="jean@exemple.com" className={cls} />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Sujet <span className="text-destructive">*</span>
-        </label>
-        <select
-          name="sujet" required
-          defaultValue=""
-          className="w-full h-11 px-3.5 rounded-xl border border-input bg-background text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
+        <label className={lbl}>Sujet{req}</label>
+        <select name="sujet" required defaultValue="" className={cls}>
           <option value="" disabled>Choisissez un sujet…</option>
           {SUJETS.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-foreground mb-1.5">
-          Message <span className="text-destructive">*</span>
-        </label>
+        <label className={lbl}>Message{req}</label>
         <textarea
           name="message" required rows={6}
           placeholder="Décrivez votre demande en détail…"
-          className="w-full px-3.5 py-3 rounded-xl border border-input bg-background text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+          className="w-full px-3 py-3 rounded-xl border border-border bg-white text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[#fbae17]/20 focus:border-[#fbae17] transition-all resize-none placeholder:text-muted-foreground/40"
         />
       </div>
 
       <button
         type="submit" disabled={isPending}
-        className="w-full h-12 flex items-center justify-center gap-2 bg-[#113356] text-white rounded-xl font-semibold text-sm hover:bg-[#0b2238] disabled:opacity-60 transition-colors"
+        className="w-full h-11 flex items-center justify-center gap-2 bg-[#113356] text-white rounded-xl font-bold text-sm hover:bg-[#0b2238] disabled:opacity-40 transition-all shadow-sm hover:shadow-md hover:-translate-y-px active:translate-y-0 cursor-pointer"
       >
         {isPending
           ? <><Loader2 size={15} className="animate-spin" /> Envoi en cours…</>

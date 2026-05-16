@@ -8,28 +8,30 @@ export const metadata = {
 
 export default function ContactPage() {
   return (
-    <main className="bg-[#f5f5f7] flex flex-col">
+    <main className="bg-[#f5f5f7] flex-1 pb-16">
+      <div className="h-[84px]" />
 
-      {/* ── En-tête ── */}
-      <div className="pt-[98px] pb-8 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-[#113356] uppercase tracking-[3px] mb-2">Support</p>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-2">Contactez-nous</h1>
-          <p className="text-muted-foreground text-sm max-w-md leading-relaxed">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
+
+        {/* ── En-tête ── */}
+        <div className="mb-6">
+          <div className="inline-flex items-center gap-2 mb-1.5">
+            <Mail size={14} className="text-muted-foreground" />
+            <p className="text-xs font-bold text-muted-foreground uppercase tracking-[2px]">Support</p>
+          </div>
+          <h1 className="text-xl font-extrabold text-foreground">Contactez-nous</h1>
+          <p className="text-muted-foreground text-sm mt-1">
             Une question, un problème ou simplement envie d&apos;en savoir plus ?
             Écrivez-nous, nous vous répondons sous 48&nbsp;h.
           </p>
         </div>
-      </div>
 
-      {/* ── Contenu ── */}
-      <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
           {/* Colonne info */}
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-white rounded-2xl border border-border p-6 shadow-sm space-y-5">
-              <h2 className="font-bold text-foreground text-sm">Informations</h2>
+              <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px]">Informations</p>
 
               <div className="flex gap-3.5">
                 <div className="w-9 h-9 rounded-xl bg-[#f5f8ff] border border-[#dce8ff] flex items-center justify-center shrink-0">
@@ -84,9 +86,14 @@ export default function ContactPage() {
 
           {/* Formulaire */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl border border-border p-6 sm:p-8 shadow-sm">
-              <h2 className="font-bold text-foreground text-sm mb-6">Envoyez-nous un message</h2>
-              <ContactForm />
+            <div className="bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
+              <div className="px-6 py-5 border-b border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[2px] mb-0.5">Message</p>
+                <h2 className="text-base font-extrabold text-foreground">Envoyez-nous un message</h2>
+              </div>
+              <div className="p-6 sm:p-7">
+                <ContactForm />
+              </div>
             </div>
           </div>
 
